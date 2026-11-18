@@ -1,0 +1,97 @@
+erDiagram
+
+    HUB_PRODUCT{
+        string product_id
+        string hk_product_id
+    }
+
+    HUB_STORE{
+        string store_id
+        string hk_store_id
+    }
+
+    HUB_TRANSACTON{
+        string transaction_id
+        string hk_transaction_id
+    }
+
+    HUB_CLIENT{
+        integer client_id
+        string hk_client_id
+    }
+
+    HUB_CARD{
+        integer card_id
+        string hk_card_id
+    }
+
+    HUB_LOYALTY_TRANSACTION{
+        integer loyalty_transaction_id
+        string hk_loyalty_transaction_id
+    }
+
+    HUB_EMPLOYEE{
+        integer employee_id
+        string hk_employee_id
+    }
+
+    LINK_SALE{
+        string hk_transaction_id
+        string hk_product_id
+        string hk_sale_id
+    }
+
+    LINK_TRANSATION_STORE{
+        string hk_transaction_id
+        string hk_store_id
+        string hk_txn_store_id
+    }
+
+    LINK_CARD_CLIENT{
+        string hk_card_id
+        string hk_client_id
+        string hk_card_client_id
+    }
+
+    LINK_LOYALTY_TXN_STORE{
+        string hk_loyalty_transaction_id
+        string hk_store_id
+        string hk_loyalty_store_id
+    }
+
+    LINK_LOYALTY_TXN_SOURCE{
+        string hk_loyalty_transaction_id
+        string hk_transaction_id
+        string hk_loyalty_source_id
+    }
+
+    LINK_EMPLOYEE_STORE{
+        string hk_employee_id
+        string hk_store_id
+        string hk_employee_store_id
+    }
+
+    HUB_PRODUCT ||--o{ LINK_SALE : "1:N"
+    HUB_STORE ||--o{ LINK_TRANSATION_STORE : "1:N"
+    HUB_STORE ||--o{ LINK_LOYALTY_TXN_STORE : "1:N"
+    HUB_STORE ||--o{ LINK_EMPLOYEE_STORE : "1:N"
+    HUB_TRANSACTON ||--o{ LINK_TRANSATION_STORE : "1:N"
+    HUB_TRANSACTON ||--o{ LINK_LOYALTY_TXN_SOURCE : "1:N"
+    HUB_CLIENT ||--o{ LINK_CARD_CLIENT : "1:N"
+    HUB_CARD ||--o{ LINK_CARD_CLIENT : "1:N"
+    HUB_CARD ||--o{ LINK_CARD_CLIENT : "1:N"
+    HUB_LOYALTY_TRANSACTION ||--o{ LINK_LOYALTY_TXN_STORE : "1:N"
+    HUB_LOYALTY_TRANSACTION ||--o{ LINK_LOYALTY_TXN_SOURCE : "1:N"
+    HUB_EMPLOYEE ||--o{ LINK_EMPLOYEE_STORE : "1:N"
+
+
+
+    
+
+
+
+
+
+
+
+    
