@@ -1,3 +1,9 @@
+---
+config:
+  theme: redux-color
+  look: classic
+  layout: dagre
+---
 flowchart LR
 
     subgraph Sources
@@ -36,25 +42,3 @@ greenplum e5@==> clickhouse
 e5@{ animate: true }
 clickhouse e6@==> superset
 e6@{ animate: true }
-
-
-
-%% flowchart LR
-%%   subgraph Client
-%%     UI[Web app]
-%%     Cache[(Local cache)]
-%%   end
-%%   subgraph Services
-%%     API[API gateway]
-%%     Auth[Auth service]
-%%     Orders[Order service]
-%%   end
-%%   subgraph Storage
-%%     DB[(Orders DB)]
-%%   end
-%%   UI --> API
-%%   UI --> Cache
-%%   API --> Auth
-%%   API --> Orders
-%%   Orders --> DB
-%%   Auth -. token .-> UI
