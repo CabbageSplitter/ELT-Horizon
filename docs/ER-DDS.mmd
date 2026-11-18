@@ -1,74 +1,176 @@
+---
+config:
+  theme: redux-color
+  look: classic
+---
 erDiagram
 
     HUB_PRODUCT{
+        string hk_product_id PK
         string product_id
-        string hk_product_id
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_STORE{
+        string hk_store_id PK
         string store_id
-        string hk_store_id
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_TRANSACTON{
+        string hk_transaction_id PK
         string transaction_id
-        string hk_transaction_id
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_CLIENT{
+        string hk_client_id PK
         integer client_id
-        string hk_client_id
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_CARD{
+        string hk_card_id PK
         integer card_id
-        string hk_card_id
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_LOYALTY_TRANSACTION{
+        string hk_loyalty_transaction_id PK
         integer loyalty_transaction_id
-        string hk_loyalty_transaction_id
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_EMPLOYEE{
+        string hk_employee_id PK
         integer employee_id
-        string hk_employee_id
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_SALE{
-        string hk_transaction_id
-        string hk_product_id
-        string hk_sale_id
+        string hk_sale_id PK
+        string hk_transaction_id FK
+        string hk_product_id FK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_TRANSATION_STORE{
-        string hk_transaction_id
-        string hk_store_id
-        string hk_txn_store_id
+        string hk_txn_store_id PK
+        string hk_transaction_id FK
+        string hk_store_id FK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_CARD_CLIENT{
-        string hk_card_id
-        string hk_client_id
-        string hk_card_client_id
+        string hk_card_client_id PK
+        string hk_card_id FK
+        string hk_client_id FK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_LOYALTY_TXN_STORE{
-        string hk_loyalty_transaction_id
-        string hk_store_id
-        string hk_loyalty_store_id
+        string hk_loyalty_store_id PK
+        string hk_loyalty_transaction_id FK
+        string hk_store_id FK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_LOYALTY_TXN_SOURCE{
-        string hk_loyalty_transaction_id
-        string hk_transaction_id
-        string hk_loyalty_source_id
+        string hk_loyalty_source_id PK
+        string hk_loyalty_transaction_id FK
+        string hk_transaction_id FK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_EMPLOYEE_STORE{
-        string hk_employee_id
-        string hk_store_id
-        string hk_employee_store_id
+        string hk_employee_store_id PK
+        string hk_employee_id FK
+        string hk_store_id FK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
+    }
+
+    SAT_PRODUCT_STATIC{
+        string hk_product_id PK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
+        load_end_dts timestamp "Дата и время окончания актуальности"
+        hash_diff varchar(32)
+    }
+
+    SAT_PRODUCT_DYNAMIC{
+        string hk_product_id PK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
+        load_dts timestamp "Дата и время загрузки"
+        load_end_dts timestamp "Дата и время окончания актуальности"
+        hash_diff varchar(32)
+    }
+    
+    SAT_TRANSACTION{
+        string hk_transaction_id PK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
+        load_dts timestamp "Дата и время загрузки"
+        load_end_dts timestamp "Дата и время окончания актуальности"
+        hash_diff varchar(32)
+    }
+
+    SAT_CLIENT{
+        string hk_client_id PK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
+        load_dts timestamp "Дата и время загрузки"
+        load_end_dts timestamp "Дата и время окончания актуальности"
+        hash_diff varchar(32)
+    }
+
+    SAT_CARD{
+        string hk_card_id PK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
+        load_dts timestamp "Дата и время загрузки"
+        load_end_dts timestamp "Дата и время окончания актуальности"
+        hash_diff varchar(32)
+    }
+
+    SAT_LOYALTY_TXN{
+        string hk_loyalty_transaction_id PK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
+        load_dts timestamp "Дата и время загрузки"
+        load_end_dts timestamp "Дата и время окончания актуальности"
+        hash_diff varchar(32)
+    }
+
+    SAT_EMPLOYEE{
+        string hk_employee_id PK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
+        load_dts timestamp "Дата и время загрузки"
+        load_end_dts timestamp "Дата и время окончания актуальности"
+        hash_diff varchar(32)
+    }
+
+    SAT_SALE{
+        string hk_sale_id PK
+        source varchar(50) "Источник"
+        load_dts timestamp "Дата и время загрузки"
+        load_dts timestamp "Дата и время загрузки"
+        load_end_dts timestamp "Дата и время окончания актуальности"
+        hash_diff varchar(32)
     }
 
     HUB_PRODUCT ||--o{ LINK_SALE : "1:N"
@@ -83,15 +185,11 @@ erDiagram
     HUB_LOYALTY_TRANSACTION ||--o{ LINK_LOYALTY_TXN_STORE : "1:N"
     HUB_LOYALTY_TRANSACTION ||--o{ LINK_LOYALTY_TXN_SOURCE : "1:N"
     HUB_EMPLOYEE ||--o{ LINK_EMPLOYEE_STORE : "1:N"
-
-
-
-    
-
-
-
-
-
-
-
-    
+    HUB_PRODUCT ||--o{ SAT_PRODUCT_STATIC : "1:N"
+    HUB_PRODUCT ||--o{ SAT_PRODUCT_DYNAMIC : "1:N"
+    HUB_TRANSACTON ||--o{ SAT_TRANSACTION : "1:N"
+    HUB_CLIENT ||--o{ SAT_CLIENT : "1:N"
+    HUB_CARD ||--o{ SAT_CARD : "1:N"
+    HUB_LOYALTY_TRANSACTION ||--o{ SAT_LOYALTY_TXN : "1:N"
+    HUB_EMPLOYEE ||--o{ SAT_EMPLOYEE : "1:N"
+    LINK_SALE ||--o{ SAT_SALE : "1:N"
