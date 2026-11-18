@@ -1,0 +1,60 @@
+flowchart LR
+
+    subgraph Sources
+        csv@{ shape: win-pane, label: ".csv-file"}
+        api[API-endpoint]
+        db@{ shape: cyl, label: "Database" }
+    end
+
+    subgraph Stage
+        s3@{ shape: cyl, label: "S3" }
+    end
+
+    subgraph DDS
+        greenplum@{ shape: cyl, label: "Greenplum" }
+    end
+
+    subgraph DataMarts
+        clickhouse@{ shape: cyl, label: "ClickHouse" }
+    end
+
+    subgraph BI
+        superset@{ shape: div-rect, label: "SuperSet" }
+    end
+
+    
+
+csv e1@==> s3
+e1@{ animate: true }
+api e2@==> s3
+e2@{ animate: true }
+db e3@==> s3
+e3@{ animate: true }
+s3 e4@==> greenplum
+e4@{ animate: true }
+greenplum e5@==> clickhouse
+e5@{ animate: true }
+clickhouse e6@==> superset
+e6@{ animate: true }
+
+
+
+%% flowchart LR
+%%   subgraph Client
+%%     UI[Web app]
+%%     Cache[(Local cache)]
+%%   end
+%%   subgraph Services
+%%     API[API gateway]
+%%     Auth[Auth service]
+%%     Orders[Order service]
+%%   end
+%%   subgraph Storage
+%%     DB[(Orders DB)]
+%%   end
+%%   UI --> API
+%%   UI --> Cache
+%%   API --> Auth
+%%   API --> Orders
+%%   Orders --> DB
+%%   Auth -. token .-> UI
