@@ -1,0 +1,51 @@
+---
+config:
+  theme: redux-color
+  look: classic
+---
+erDiagram
+
+    dim_calendar{
+        date_key integer "SK"
+        full_date date
+        day_of_week tinyint
+        day_name varchar(10)
+        quarter tinyint
+        year smallint
+        is_holiday boolean
+    }
+
+    dim_product{
+        product_key integer "SK"
+        product_id string
+        product_name varchar(255)
+        category varchar(100)
+        brand varchar(100)
+        valid_from date
+        valid_to date
+        is_current boolean
+    }
+
+    dim_store{
+        store_key integer "SK"
+        store_id string
+        address varchar(255)
+        region varchar(100)
+        valid_from date
+        valid_to date
+        is_current boolean
+    }
+
+    fact_sales_daily{
+        date_key integer FK
+        store_key integer FK
+        product_key integer FK
+        sum_sales decimal(12,2) "Общая сумма продаж товара за день (сумма amount по позициям)"
+        num_transactions integer "Кол-во уникальных чеков, содержащих данный товар в этот день в этом магазине"
+        avg_transaction_amount decimal(10,2) "Средняя общая сумма чека по этим чекам"
+    }
+
+    dim_calendar ||--o{ fact_sales_daily : "1:N"
+    dim_product ||--o{ fact_sales_daily : "1:N"
+    dim_store ||--o{ fact_sales_daily : "1:N"
+

@@ -6,104 +6,104 @@ config:
 erDiagram
 
     HUB_PRODUCT{
-        string hk_product_id PK
-        string product_id
+        hk_product_id string PK
+        product_id string
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_STORE{
-        string hk_store_id PK
-        string store_id
+        hk_store_id string PK 
+        store_id string 
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_TRANSACTON{
-        string hk_transaction_id PK
-        string transaction_id
+        hk_transaction_id string PK 
+        transaction_id string 
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_CLIENT{
-        string hk_client_id PK
-        integer client_id
+        hk_client_id string PK 
+        client_id integer
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_CARD{
-        string hk_card_id PK
-        integer card_id
+        hk_card_id string PK 
+        card_id integer
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_LOYALTY_TRANSACTION{
-        string hk_loyalty_transaction_id PK
-        integer loyalty_transaction_id
+        hk_loyalty_transaction_id string PK
+        loyalty_transaction_id integer
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     HUB_EMPLOYEE{
-        string hk_employee_id PK
-        integer employee_id
+        hk_employee_id string PK
+        employee_id integer
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_SALE{
-        string hk_sale_id PK
-        string hk_transaction_id FK
-        string hk_product_id FK
+        hk_sale_id string PK
+        hk_transaction_id string FK
+        hk_product_id string FK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_TRANSATION_STORE{
-        string hk_txn_store_id PK
-        string hk_transaction_id FK
-        string hk_store_id FK
+        hk_txn_store_id string PK
+        hk_transaction_id string FK
+        hk_store_id string FK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_CARD_CLIENT{
-        string hk_card_client_id PK
-        string hk_card_id FK
-        string hk_client_id FK
+        hk_card_client_id string PK
+        hk_card_id string FK
+        hk_client_id string FK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_LOYALTY_TXN_STORE{
-        string hk_loyalty_store_id PK
-        string hk_loyalty_transaction_id FK
-        string hk_store_id FK
+        hk_loyalty_store_id string PK
+        hk_loyalty_transaction_id string FK
+        hk_store_id string FK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_LOYALTY_TXN_SOURCE{
-        string hk_loyalty_source_id PK
-        string hk_loyalty_transaction_id FK
-        string hk_transaction_id FK
+        hk_loyalty_source_id string PK
+        hk_loyalty_transaction_id string FK
+        hk_transaction_id string FK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     LINK_EMPLOYEE_STORE{
-        string hk_employee_store_id PK
-        string hk_employee_id FK
-        string hk_store_id FK
+        hk_employee_store_id string PK
+        hk_employee_id string FK
+        hk_store_id string FK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
     }
 
     SAT_PRODUCT_STATIC{
-        string hk_product_id PK
+        hk_product_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
         load_end_dts timestamp "Дата и время окончания актуальности"
@@ -114,7 +114,7 @@ erDiagram
     }
 
     SAT_PRODUCT_DYNAMIC{
-        string hk_product_id PK
+        hk_product_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
         load_end_dts timestamp "Дата и время окончания актуальности"
@@ -124,7 +124,7 @@ erDiagram
     }
 
     SAT_STORE{
-        string hk_store_id PK
+        hk_store_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
         load_end_dts timestamp "Дата и время окончания актуальности"
@@ -136,7 +136,7 @@ erDiagram
     }
     
     SAT_TRANSACTION{
-        string hk_transaction_id PK
+        hk_transaction_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
         load_dts timestamp "Дата и время загрузки"
@@ -148,7 +148,7 @@ erDiagram
     }
 
     SAT_CLIENT{
-        string hk_client_id PK
+        hk_client_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
         load_dts timestamp "Дата и время загрузки"
@@ -162,7 +162,7 @@ erDiagram
     }
 
     SAT_CARD{
-        string hk_card_id PK
+        hk_card_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
         load_dts timestamp "Дата и время загрузки"
@@ -174,7 +174,7 @@ erDiagram
     }
 
     SAT_LOYALTY_TXN{
-        string hk_loyalty_transaction_id PK
+        hk_loyalty_transaction_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
         load_dts timestamp "Дата и время загрузки"
@@ -186,12 +186,12 @@ erDiagram
     }
 
     SAT_EMPLOYEE{
-        string hk_employee_id PK
+        hk_employee_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
         load_dts timestamp "Дата и время загрузки"
         load_end_dts timestamp "Дата и время окончания актуальности"
-        hash_diff varchar(32)
+        hash_diff varchar(32) "hash от full_name, position"
         full_name varchar(255)
         position varchar(100)
         ohire_date date
@@ -199,12 +199,14 @@ erDiagram
     }
 
     SAT_SALE{
-        string hk_sale_id PK
+        hk_sale_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
         load_dts timestamp "Дата и время загрузки"
         load_end_dts timestamp "Дата и время окончания актуальности"
-        hash_diff varchar(32)
+        hash_diff varchar(32) "hash от amount, quantity"
+        amount decimal(10,2)
+        quantity decimal(10,3)
     }
 
     HUB_PRODUCT ||--o{ LINK_SALE : "1:N"
