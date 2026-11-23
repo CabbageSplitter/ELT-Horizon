@@ -17,7 +17,6 @@ def list_files():
     """
         сканирует папку и возвращает списко абсолютных путей ко всем файлам с форматом, указанным в EXTTENSIONS
     """
-    logger.info(f"=== НАЧАЛО list_files ===")
     logger.info(f"Ищем файлы в папке: {LOCAL_DIR}")
     logger.info(f"Расширения: {EXTENSIONS}")
     try:
@@ -32,24 +31,15 @@ def list_files():
 
         logger.info(f"Всего найдено файлов: {len(found)}")
         if len(found) == 0:
-            logger.warning("⚠️ Файлов не найдено! Задачи wait и upload не будут созданы.")
+            logger.warning("Файлов не найдено! Задачи wait и upload не будут созданы.")
         
-        logger.info(f"=== КОНЕЦ list_files ===")
         return sorted(found)
     except Exception as e:
         logger.error(f"ОШИБКА в list_files: {str(e)}")
         logger.error(traceback.format_exc())
         raise
 
-def ensure_bucket(bucket):
-    """
-    создает бакет в s3, если его нет
-    """
-    hook=S3Hook(aws_conn_id='s3_default')
-    try:
-        hook.get_conn().head_bucket(Bucket=bucket)
-    except botocore.exceptions.ClientError:
-        hook.get_conn().create_bucket(Bucket=bucket)
+
 
 def upload_one(local_path, **kwargs):
     bucket = kwargs["templates_dict"][1]
@@ -76,7 +66,7 @@ def upload_one(local_path, **kwargs):
                 bucket_name = bucket,
                 replace=True
             )
-            logger.info(f"✅ УСПЕХ: {path} -> s3://{bucket}/{s3_key}")
+            logger.info(f"УСПЕХ: {path} -> s3://{bucket}/{s3_key}")
             
         except Exception as e:
             logger.error(f"ОШИБКА в upload_one: {str(e)}")
@@ -107,11 +97,7 @@ with DAG(
         soft_fail=False
     ).expand(filepath=file_paths)
 
-    create_bucket = PythonOperator(
-        task_id='ensure_bucket',
-        python_callable=ensure_bucket,
-        op_args=[BUCKET]
-    )
+
 
     upload=PythonOperator.partial(
         task_id='upload_to_s3',
