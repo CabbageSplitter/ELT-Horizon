@@ -1,6 +1,23 @@
 version: '3.8'
 
 services:
+
+  clickhouse:
+    image:  clickhouse/clickhouse-server:24.8
+    container_name: clickhouse_server
+    ports:
+      - "8123:8123" #HTTP
+      - "9000:9000"
+    environment:
+      - CLICKHOUSE_DB=horizon
+      - CLICKHOUSE_USER=clickhouse
+      - CLICKHOUSE_PASSWORD-clickhouse
+      - CLICKHOUSE_DEFAULT_ACCESS_NAMAGEMENT=1
+    volumes:
+      - ./clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse_logs:/var/log/clickhouse_server
+    restart: unless-stopped
+
   postgres: # БД Airflow
     image: postgres:15
     container_name: airflow-postgres
@@ -21,7 +38,6 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__FERNET_KEY: ""
-      _PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow providers-amazon"
     entrypoint: /bin/bash
     command:
       - -c
@@ -43,11 +59,10 @@ services:
     depends_on:
       - postgres
       - airflow-init
+      - clickhouse
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW_CONN_S3_DEFAULT: >-
-        s3://any:any@?endpoint_url=http%3A%2F%2Fseaweedfs%3A8333&region_name=us-east-1
     ports:
       - "8080:8080"
     volumes:
@@ -64,14 +79,27 @@ services:
     depends_on:
       - postgres
       - airflow-init
+      - clickhouse
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW_CONN_S3_DEFAULT: >-
-        s3://any:any@?endpoint_url=http%3A%2F%2Fseaweedfs%3A8333&region_name=us-east-1
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./data:/opt/airflow/data
     command: scheduler
     restart: unless-stopped
+
+  dbt:
+    build:
+      context: ./dbt
+    container_name: dbt
+    profiles: ["tools"]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    volumes:
+      - ./dbt:/usr/app/dbt
+    working_dir: /usr/app/dbt
+    environment:
+      DBT_PROFILES_DIR: /usr/app/dbt
