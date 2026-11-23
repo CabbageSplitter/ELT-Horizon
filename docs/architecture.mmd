@@ -8,37 +8,26 @@ flowchart LR
 
     subgraph Sources
         csv@{ shape: win-pane, label: ".csv-file"}
-        api[API-endpoint]
-        db@{ shape: cyl, label: "Database" }
+        json[hr.json - like api response]
+        xlsx@{ shape: cyl, label: ".xlsx-files - like db request result" }
     end
 
-    subgraph Stage
-        s3@{ shape: cyl, label: "S3" }
-    end
+    subgraph DWH - Clickhouse
+        stage@{ shape: cyl, label: "Stage" }
+        dds@{ shape: cyl, label: "DDS" }
+        dm@{ shape: cyl, label: "DM" }
 
-    subgraph DDS
-        greenplum@{ shape: cyl, label: "Greenplum" }
-    end
-
-    subgraph DataMarts
-        clickhouse@{ shape: cyl, label: "ClickHouse" }
-    end
-
-    subgraph BI
-        superset@{ shape: div-rect, label: "SuperSet" }
     end
 
     
 
-csv e1@==> s3
+csv e1@==> stage
 e1@{ animate: true }
-api e2@==> s3
+json e2@==> stage
 e2@{ animate: true }
-db e3@==> s3
+xlsx e3@==> stage
 e3@{ animate: true }
-s3 e4@==> greenplum
+stage e4@==> dds
 e4@{ animate: true }
-greenplum e5@==> clickhouse
+dds e5@==> dm
 e5@{ animate: true }
-clickhouse e6@==> superset
-e6@{ animate: true }
