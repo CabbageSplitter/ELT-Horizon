@@ -9,9 +9,9 @@ services:
       - "8123:8123" #HTTP
       - "9000:9000"
     environment:
-      - CLICKHOUSE_DB=horizon
-      - CLICKHOUSE_USER=clickhouse
-      - CLICKHOUSE_PASSWORD-clickhouse
+      - CLICKHOUSE_DB=${CLICKHOUSE_DB}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
       - CLICKHOUSE_DEFAULT_ACCESS_NAMAGEMENT=1
     volumes:
       - ./clickhouse_data:/var/lib/clickhouse
@@ -22,9 +22,9 @@ services:
     image: postgres:15
     container_name: airflow-postgres
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -35,7 +35,7 @@ services:
     depends_on:
       - postgres
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__FERNET_KEY: ""
     entrypoint: /bin/bash
@@ -44,12 +44,12 @@ services:
       - |
         airflow db migrate
         airflow users create \
-          --username admin \
-          --password admin \
+          --username ${AIRFLOW_USERNAME} \
+          --password ${AIRFLOW_PASSWORD} \
           --firstname Admin \
           --lastname Admin \
           --role Admin \
-          --email admin@example.com || true
+          --email ${AIRFLOW_EMAIL} || true
 
     restart: "no"
 
@@ -61,7 +61,7 @@ services:
       - airflow-init
       - clickhouse
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
     ports:
       - "8080:8080"
@@ -81,7 +81,7 @@ services:
       - airflow-init
       - clickhouse
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
     volumes:
       - ./dags:/opt/airflow/dags
