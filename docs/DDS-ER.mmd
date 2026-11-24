@@ -139,7 +139,6 @@ erDiagram
         hk_transaction_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
-        load_dts timestamp "Дата и время загрузки"
         load_end_dts timestamp "Дата и время окончания актуальности"
         hash_diff varchar(32) "hash от date_time, sum_amount, payment_method"
         transaction_date timestamp
@@ -150,7 +149,6 @@ erDiagram
     SAT_CLIENT{
         hk_client_id string PK
         source varchar(50) "Источник"
-        load_dts timestamp "Дата и время загрузки"
         load_dts timestamp "Дата и время загрузки"
         load_end_dts timestamp "Дата и время окончания актуальности"
         hash_diff varchar(32) "hash от full_name, phone, email"
@@ -176,7 +174,6 @@ erDiagram
         hk_loyalty_transaction_id string PK
         source varchar(50) "Источник"
         load_dts timestamp "Дата и время загрузки"
-        load_dts timestamp "Дата и время загрузки"
         load_end_dts timestamp "Дата и время окончания актуальности"
         hash_diff varchar(32) "hash от points, transaction_date, type"
         points integer
@@ -187,7 +184,6 @@ erDiagram
     SAT_EMPLOYEE{
         hk_employee_id string PK
         source varchar(50) "Источник"
-        load_dts timestamp "Дата и время загрузки"
         load_dts timestamp "Дата и время загрузки"
         load_end_dts timestamp "Дата и время окончания актуальности"
         hash_diff varchar(32) "hash от full_name, position"
@@ -200,7 +196,6 @@ erDiagram
     SAT_SALE{
         hk_sale_id string PK
         source varchar(50) "Источник"
-        load_dts timestamp "Дата и время загрузки"
         load_dts timestamp "Дата и время загрузки"
         load_end_dts timestamp "Дата и время окончания актуальности"
         hash_diff varchar(32) "hash от amount, quantity"
