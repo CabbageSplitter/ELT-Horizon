@@ -19,6 +19,8 @@ flowchart LR
 
     end
 
+    bi[Superset]
+
     
 
 csv e1@==> stage
@@ -31,3 +33,6 @@ stage e4@==> dds
 e4@{ animate: true }
 dds e5@==> dm
 e5@{ animate: true }
+dm e6@==> bi
+e6@{ animate: true }
+
