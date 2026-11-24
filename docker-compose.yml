@@ -105,3 +105,6 @@ services:
     working_dir: /usr/app/dbt
     environment:
       DBT_PROFILES_DIR: /usr/app/dbt
+      DBT_CH_HOST: clickhouse
+      DBT_CH_USER: clickhouse
+      DBT_CH_PASSWORD: clickhouse

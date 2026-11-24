@@ -12,6 +12,8 @@ clean-targets: ["target", "dbt_packages"]
 
 models:
   horizon:
+    raw:
+      +materialized: table
     staging:
       +materialized: incremental
     core:

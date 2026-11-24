@@ -1,5 +1,5 @@
 with source as (
-    select * from {{ source('raw', 'sales') }}
+    select * from {{ source('raw', 'raw_sales') }}
 ),
 
 cleaned as (
@@ -7,7 +7,7 @@ cleaned as (
         toUUID(transaction_id) as transaction_id,
         toString(product_id) as product_id,
         cast(amount, decimal(10,2)) as amount,
-        toFloat32(oquantity) as oquantity,
+        cast(oquantity, decimal(10,3)) as oquantity,
         toString(store_id) as store_id,
         toDateTime(datetime) as datetime
     from source

@@ -1,5 +1,5 @@
 with source as (
-    select * from {{ source('raw', 'clients') }}
+    select * from {{ source('raw', 'raw_clients') }}
 ),
 
 cleaned as (
