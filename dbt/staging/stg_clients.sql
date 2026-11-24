@@ -11,7 +11,7 @@ cleaned as (
         toString(email) as email,
         toDate(registration_date) as registration_date
     from source
-    where event_id is not null
+    where client_id is not null
 )
 
 select * from cleaned

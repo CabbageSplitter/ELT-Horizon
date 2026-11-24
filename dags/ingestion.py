@@ -1,10 +1,13 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.sensors.filesystem import FileSensor
 from airflow.exceptions import AirflowException
 from datetime import datetime
 import os, glob, botocore, logging, traceback
+
+from sql.create_raw import CreateRawTables
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -97,7 +100,11 @@ with DAG(
         soft_fail=False
     ).expand(filepath=file_paths)
 
-
+    create_raw_cards = SQLExecuteQueryOperator(
+        task_id = "create_raw_cards",
+        conn_id = "",
+        sql = CreateRawTables.create_cards()
+    )
 
     upload=PythonOperator.partial(
         task_id='upload_to_s3',
