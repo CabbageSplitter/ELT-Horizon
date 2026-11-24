@@ -105,6 +105,31 @@ with DAG(
         conn_id = "",
         sql = CreateRawTables.create_cards()
     )
+    create_raw_clients = SQLExecuteQueryOperator(
+        task_id = "create_raw_clients",
+        conn_id = "",
+        sql = CreateRawTables.create_clients()
+    )
+    create_raw_products = SQLExecuteQueryOperator(
+        task_id = "create_raw_products",
+        conn_id = "",
+        sql = CreateRawTables.create_products()
+    )
+    create_raw_sales = SQLExecuteQueryOperator(
+        task_id = "create_raw_sales",
+        conn_id = "",
+        sql = CreateRawTables.create_sales()
+    )
+    create_raw_stores = SQLExecuteQueryOperator(
+        task_id = "create_raw_stores",
+        conn_id = "",
+        sql = CreateRawTables.create_stores()
+    )
+    create_raw_transactions = SQLExecuteQueryOperator(
+        task_id = "create_raw_transactions",
+        conn_id = "",
+        sql = CreateRawTables.create_transactions()
+    )
 
     upload=PythonOperator.partial(
         task_id='upload_to_s3',
