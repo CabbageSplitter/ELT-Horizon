@@ -4,14 +4,14 @@ with source as (
 
 cleaned as (
     select 
-        toString(product_id),
-        toString(name),
-        toString(category),
-        toString(brand)
-        cast(purchase_price, decimal(10,2))
-        toBool(status)
+        toString(product_id) as product_id,
+        toString(name) as name,
+        toString(category) as category,
+        toString(brand) as brand,
+        cast(purchase_price, decimal(10,2)) as purchase_price,
+        toBool(status) as status
     from source
-    where card_id is not null
+    where product_id is not null
 )
 
 select * from cleaned
