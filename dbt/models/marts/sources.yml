@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: marts
+    database: horizon
+    tables:
+      - name: dim_calendar
+      - name: dim_product
+      - name: dim_store
+      - name: dact_sales_daily
