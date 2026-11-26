@@ -1,10 +1,33 @@
 version: 2
 
 sources:
-  - name: marts
+  - name: core
     database: horizon
     tables:
-      - name: dim_calendar
-      - name: dim_product
-      - name: dim_store
-      - name: dact_sales_daily
+      - name: HUB_CARD
+      - name: HUB_CLIENT
+      - name: HUB_PRODUCT
+      - name: HUB_LOYALTY_TRANSACTION
+      - name: HUB_TRANSACTION
+      - name: HUB_STORE
+      - name: HUB_EMPLOYEE
+
+      - name: LINK_CARD_CLIENT
+      - name: LINK_SALE
+      - name: LINK_LOYALTY_TXN_SOURCE
+      - name: LINK_LOYALTY_TXN_STORE
+      - name: LINK_TRANSACTION_STORE
+      - name: LINK_EMPLOYEE_STORE
+
+      - name: SAT_CARD
+      - name: SAT_CLIENT
+      - name: SAT_PRODUCT_DYNAMIC
+      - name: SAT_SALE
+      - name: SAT_PRODUCT_STATIC
+      - name: SAT_LOYALTY_TXN
+      - name: SAT_TRANSACTION
+      - name: SAT_STORE
+      - name: SAT_EMPLOYEE
+
+
+

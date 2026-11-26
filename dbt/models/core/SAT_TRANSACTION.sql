@@ -1,33 +1,19 @@
-with source_sales as (
-    select * from {{ source('staging', 'stg_sales') }}
-),
-source_transactions as (
-    select * from {{ source('staging', 'stg_transactions') }}
-),
+{{ config(materialized='incremental', incremental_strategy='append') }}
+with sa as (select * from {{ source('staging', 'stg_sales') }}),
+tr as (select * from {{ source('staging', 'stg_transactions') }}),
 sales_agg as (
-    select 
-        transaction_id,
-        any(datetime) as transaction_date,
-        sum(amount) as sum_amount
-    from source_sales
-    group by transaction_id
+    select transaction_id, any(datetime) as transaction_date, sum(amount) as sum_amount
+    from sa group by transaction_id
 ),
-sat_sales as (
-    select 
-        toString(md5(sa.transaction_id)) as hk_transaction_id,
-        toFixedString('staging.stg_sales, staging.stg_transactions', 50) as source,
-        toDateTime(now()) as load_dts,
+sat as (
+    select distinct
+        {{ hash_key(['sa.transaction_id']) }} as hk_transaction_id,
+        'staging.stg_sales, staging.stg_transactions' as source, now() as load_dts,
         toDateTime('9999-12-31 23:59:59') as load_end_dts,
-        toFixedString(md5(concat(sa.transaction_date, '|',sa.sum_amount)), 32) as hash_diff,
-        sa.transaction_date as transaction_date,
-        sa.sum_amount as sum_amount,
-        CASE
-            when tr.source_transaction_id is null then toFixedString('нал', 10)
-            else toFixedString('безнал', 10)
-        end as payment_method
-    from sales_agg sa
-    left join source_transactions as tr
-    on tr.source_transaction_id = tpString(sa.transaction_id)
+        {{ hash_key(['sa.transaction_date', 'sa.sum_amount']) }} as hash_diff,
+        sa.transaction_date, sa.sum_amount,
+        if(tr.source_transaction_id is null, 'нал', 'безнал') as payment_method
+    from sales_agg sa any left join tr on tr.source_transaction_id = sa.transaction_id
 )
-
-select * from sat_sales
+select * from sat
+{% if is_incremental() %} where (hk_transaction_id, hash_diff) not in (select hk_transaction_id, hash_diff from {{ this }}) {% endif %}

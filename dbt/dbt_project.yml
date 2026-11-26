@@ -4,10 +4,10 @@ config-version: 2
 profile: horizon_elt
 
 model-paths: ["models"]
-tests-paths: ["tests"]
+test-paths: ["tests"]
 macro-paths: ["macros"]
 
-target-paths: ["target"]
+target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
 models:
@@ -15,8 +15,11 @@ models:
     raw:
       +materialized: table
     staging:
-      +materialized: incremental
+      +materialized: table
+      +tags: ["staging"] 
     core:
       +materialized: incremental
+      +tags: ["core"] 
     marts:
       +materialized: table
+      +tags: ["marts"] 

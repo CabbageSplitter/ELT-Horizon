@@ -1,13 +1,12 @@
 version: 2
-
 sources:
-  - name: staging
+  - name: raw
     database: horizon
     tables:
-      - name: stg_clients
-      - name: stg_cards
-      - name: stg_products
-      - name: stg_sales
-      - name: stg_stores
-      - name: stg_transactions
-      - name: stg_hr
+      - name: raw_cards
+      - name: raw_clients
+      - name: raw_products
+      - name: raw_sales
+      - name: raw_stores
+      - name: raw_transactions
+      - name: raw_hr

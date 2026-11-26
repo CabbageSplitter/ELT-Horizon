@@ -1,17 +1,13 @@
-with source as (
-    select * from {{ source('raw', 'raw_products') }}
-),
-
+with source as (select * from {{ source('raw', 'raw_products') }}),
 cleaned as (
-    select 
+    select
         toString(product_id) as product_id,
         toString(name) as name,
         toString(category) as category,
         toString(brand) as brand,
-        cast(purchase_price, decimal(10,2)) as purchase_price,
-        toBool(status) as status
+        accurateCastOrNull(nullIf(purchase_price, ''), 'Decimal(10,2)') as purchase_price,
+        toString(status) as status
     from source
-    where product_id is not null
+    where nullIf(product_id, '') is not null
 )
-
 select * from cleaned

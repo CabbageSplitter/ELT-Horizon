@@ -4,7 +4,7 @@
     "full_name": "Козлов Дмитрий Андреевич",
     "position": "управляющий",
     "store_id": "MSK-01",
-    "ohire_date": "2020-03-15",
+    "hire_date": "2020-03-15",
     "termination_date": null
   },
   {
@@ -12,7 +12,7 @@
     "full_name": "Смирнова Анна Петровна",
     "position": "кассир",
     "store_id": "MSK-01",
-    "ohire_date": "2023-06-01",
+    "hire_date": "2023-06-01",
     "termination_date": null
   },
   {
@@ -20,7 +20,7 @@
     "full_name": "Кузнецов Дмитрий Сергеевич",
     "position": "продавец-консультант",
     "store_id": "SPB-01",
-    "ohire_date": "2022-09-10",
+    "hire_date": "2022-09-10",
     "termination_date": "2025-11-30"
   },
   {
@@ -28,7 +28,7 @@
     "full_name": "Волкова Елена Игоревна",
     "position": "кассир",
     "store_id": "SPB-01",
-    "ohire_date": "2024-02-18",
+    "hire_date": "2024-02-18",
     "termination_date": null
   },
   {
@@ -36,7 +36,7 @@
     "full_name": "Морозов Сергей Викторович",
     "position": "управляющий",
     "store_id": "KZN-01",
-    "ohire_date": "2021-07-01",
+    "hire_date": "2021-07-01",
     "termination_date": null
   }
 ]

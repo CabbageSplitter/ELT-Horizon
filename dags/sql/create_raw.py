@@ -1,5 +1,5 @@
 class CreateRawTables:
-    
+
     def __init__(self):
         self.db_name = 'horizon'
 
@@ -12,7 +12,7 @@ class CreateRawTables:
                 card_number String,
                 issue_date String,
                 status String,
-                _loaded_at Datetime default now()
+                _loaded_at DateTime default now()
             )
             Engine = MergeTree
             order by (card_id)
@@ -28,7 +28,7 @@ class CreateRawTables:
                 phone String,
                 email String,
                 registration_date String,
-                _loaded_at Datetime default now()
+                _loaded_at DateTime default now()
             )
             Engine = MergeTree
             order by (client_id)
@@ -44,12 +44,12 @@ class CreateRawTables:
                 brand String,
                 purchase_price String,
                 status String,
-                _loaded_at Datetime default now()
+                _loaded_at DateTime default now()
             )
             Engine = MergeTree
             order by (product_id)
         """
-    
+
     def create_sales(self):
         return f"""
             create table if not exists {self.db_name}.raw_sales
@@ -60,7 +60,7 @@ class CreateRawTables:
                 oquantity String,
                 store_id String,
                 datetime String,
-                _loaded_at Datetime default now()
+                _loaded_at DateTime default now()
             )
             Engine = MergeTree
             order by (transaction_id)
@@ -75,12 +75,12 @@ class CreateRawTables:
                 region String,
                 phone String,
                 type String,
-                _loaded_at Datetime default now()
+                _loaded_at DateTime default now()
             )
             Engine = MergeTree
             order by (store_id)
         """
-    
+
     def create_transactions(self):
         return f"""
             create table if not exists {self.db_name}.raw_transactions
@@ -91,8 +91,24 @@ class CreateRawTables:
                 transaction_date String,
                 store_id String,
                 source_transaction_id String,
-                _loaded_at Datetime default now()
+                _loaded_at DateTime default now()
             )
             Engine = MergeTree
             order by (loyalty_transaction_id)
+        """
+
+    def create_hr(self):
+        return f"""
+            create table if not exists {self.db_name}.raw_hr
+            (
+                employee_id String,
+                full_name String,
+                position String,
+                hire_date String,
+                termination_date String,
+                store_id String,
+                _loaded_at DateTime default now()
+            )
+            Engine = MergeTree
+            order by (employee_id)
         """

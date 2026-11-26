@@ -12,11 +12,16 @@ services:
       - CLICKHOUSE_DB=${CLICKHOUSE_DB}
       - CLICKHOUSE_USER=${CLICKHOUSE_USER}
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
-      - CLICKHOUSE_DEFAULT_ACCESS_NAMAGEMENT=1
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
     volumes:
-      - ./clickhouse_data:/var/lib/clickhouse
-      - ./clickhouse_logs:/var/log/clickhouse_server
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse_server
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   postgres: # БД Airflow
     image: postgres:15
@@ -28,16 +33,28 @@ services:
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 
   airflow-init:
-    image: apache/airflow:2.10.3
+    image: apache/airflow:2.11.2
     container_name: airflow-init
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__FERNET_KEY: ""
+      _PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow-providers-clickhousedb==1.0.1 pandas openpyxl urllib3<2.0.0"
+      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}@clickhouse:8123/${CLICKHOUSE_DB}
+
     entrypoint: /bin/bash
     command:
       - -c
@@ -54,16 +71,21 @@ services:
     restart: "no"
 
   airflow-webserver:
-    image: apache/airflow:2.10.3
+    image: apache/airflow:2.11.2
     container_name: airflow-webserver
     depends_on:
-      - postgres
-      - airflow-init
-      - clickhouse
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+      clickhouse:
+        condition: service_healthy
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CONN_CLICKHOUSE_DEFAULT: clickhouse://${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}@localhost:8123/${CLICKHOUSE_DB}
+      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}@clickhouse:8123/${CLICKHOUSE_DB}
+      _PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow-providers-clickhousedb==1.0.1 pandas openpyxl urllib3<2.0.0"
+      AIRFLOW_CONN_FS_DEFAULT: '{"conn_type": "fs", "extra": {"path": "/opt/airflow/data"}}'
     ports:
       - "8080:8080"
     volumes:
@@ -75,24 +97,31 @@ services:
 
 
   airflow-scheduler:
-    image: apache/airflow:2.10.3
+    image: apache/airflow:2.11.2
     container_name: airflow-scheduler
     depends_on:
-      - postgres
-      - airflow-init
-      - clickhouse
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+      clickhouse:
+        condition: service_healthy
     environment:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CONN_CLICKHOUSE_DEFAULT: clickhouse://${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}@localhost:8123/${CLICKHOUSE_DB}
+      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}@clickhouse:8123/${CLICKHOUSE_DB}
+      AIRFLOW_CONN_FS_DEFAULT: '{"conn_type": "fs", "extra": {"path": "/opt/airflow/data"}}'
+      _PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow-providers-clickhousedb==1.0.1 apache-airflow-providers-docker pandas openpyxl urllib3<2.0.0"
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./data:/opt/airflow/data
+      - /var/run/docker.sock:/var/run/docker.sock
     command: scheduler
     restart: unless-stopped
 
   dbt:
+    image: horizon-dbt:latest
     build:
       context: ./dbt
     container_name: dbt
@@ -106,5 +135,13 @@ services:
     environment:
       DBT_PROFILES_DIR: /usr/app/dbt
       DBT_CH_HOST: clickhouse
-      DBT_CH_USER: clickhouse
-      DBT_CH_PASSWORD: clickhouse
+      DBT_CH_USER: ${CLICKHOUSE_USER}
+      DBT_CH_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+volumes:
+  clickhouse_data:
+  clickhouse_logs:
+
+networks:
+  default:
+    name: horizon_net
