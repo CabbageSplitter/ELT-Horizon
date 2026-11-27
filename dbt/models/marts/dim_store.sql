@@ -1,28 +1,43 @@
-with sat_store as (
-    select * from {{ source('core', 'SAT_STORE') }}
-),
-hub_store as (
-    select * from {{ source('core', 'HUB_STORE') }}
-)
+{{ config(
+    materialized='table',
+    engine='MergeTree()',
+    order_by='(store_id, valid_from)'
+) }}
 
-
-dim_store as (
+with sat as (
     select
-        toInt64(replaceAll(ss.phone, '+', '')) as store_key,
-        hs.store_id as store_id,
-        ss.address as address,
-        ss.region as region,
-        ss.load_dts as valid_from,
-        ss.load_end_dts as valid_to,
-        case
-            when ss.load_end_dts = toDateTime('9999-12-31 23:59:59')
-                then True
-            else False
-        end as is_current
+        hk_store_id, address, region, load_dts,
+        row_number() over (
+            partition by hk_store_id, toDate(load_dts)
+            order by load_dts desc
+        ) as rn
+    from {{ ref('SAT_STORE') }}
+),
 
-    from sat_store ss
-    left any join hub_store hs
-    on ss.hk_store_id = hs.hk_store_id
+versions as (
+    select
+        hk_store_id, address, region,
+        toDate(load_dts) as valid_from,
+        leadInFrame(toNullable(toDate(load_dts)), 1) over (
+            partition by hk_store_id order by load_dts
+            rows between unbounded preceding and unbounded following
+        ) as next_from
+    from sat
+    where rn = 1
+),
+
+hub as (
+    select hk_store_id, store_id
+    from {{ ref('HUB_STORE') }}
 )
 
-select * from dim_store
+select
+    row_number() over (order by h.store_id, v.valid_from) as store_key,
+    h.store_id,
+    v.address,
+    v.region,
+    v.valid_from,
+    coalesce(v.next_from, toDate('2100-12-31')) as valid_to,
+    v.next_from is null as is_current
+from versions v
+inner join hub h on v.hk_store_id = h.hk_store_id

@@ -1,29 +1,44 @@
-with sat_product_static as (
-    select * from {{ source('core', 'SAT_PRODUCT_STATIC') }}
+{{ config(
+    materialized='table',
+    engine='MergeTree()',
+    order_by='(product_id, valid_from)'
+) }}
+
+with sat as (
+    select
+        hk_product_id, name, category, brand, load_dts,
+        row_number() over (
+            partition by hk_product_id, toDate(load_dts)
+            order by load_dts desc
+        ) as rn
+    from {{ ref('SAT_PRODUCT_STATIC') }}
 ),
-hub_product as (
-    select * from {{ source('core', 'SAT_PRODUCT_STATIC') }}
+
+versions as (
+    select
+        hk_product_id, name, category, brand,
+        toDate(load_dts) as valid_from,
+        leadInFrame(toNullable(toDate(load_dts)), 1) over (
+            partition by hk_product_id order by load_dts
+            rows between unbounded preceding and unbounded following
+        ) as next_from
+    from sat
+    where rn = 1
+),
+
+hub as (
+    select hk_product_id, product_id
+    from {{ ref('HUB_PRODUCT') }}
 )
 
-
-dim_products as (
-    select 
-        (select toInt32(replaceRegexpAll(hp.product_id, '\p{L}', ''))) as product_key,
-        hp.product_id as product_id,
-        sp.name as product_name,
-        sp.category as category,
-        sp.brand as brand,
-        sp.load_dts as valid_from,
-        sp.load_end_dts as valid_to,
-        case
-            when sp.load_end_dts = toDateTime('9999-12-31 23:59:59')
-                then True
-            else False
-        end as is_current
-
-    from sat_product_static sp
-    left any join hub_product hp
-    on sp.hk_product_id = hp.hk_product_id
-)
-
-select * from dim_products
+select
+    row_number() over (order by h.product_id, v.valid_from) as product_key,
+    h.product_id,
+    v.name as product_name,
+    v.category,
+    v.brand,
+    v.valid_from,
+    coalesce(v.next_from, toDate('2100-12-31')) as valid_to,
+    v.next_from is null as is_current
+from versions v
+inner join hub h on v.hk_product_id = h.hk_product_id

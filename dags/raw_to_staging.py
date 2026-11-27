@@ -28,7 +28,7 @@ with DAG(
     schedule=None,
     catchup=False,
     tags=["dwh", "staging", "dbt"],
-    description="Шаг 2: raw → staging через dbt",
+    description="raw -> staging через dbt",
     default_args={"retries": 1},
 ) as dag:
 

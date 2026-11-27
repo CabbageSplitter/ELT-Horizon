@@ -46,9 +46,9 @@ all_lines as (
 
     -- все позиции всех чеков: нужно для итога чека по всем товарам
     select
-        l.hk_transaction_id,
-        l.hk_product_id,
-        s.amount
+        l.hk_transaction_id as hk_transaction_id,
+        l.hk_product_id as hk_product_id,
+        s.amount as amount
     from link_sale as l
     inner join sat_sale as s
         on l.hk_sale_id = s.hk_sale_id
@@ -71,10 +71,10 @@ lines as (
     -- позиции с датой и магазином чека
     select
         toDate(t.transaction_date) as transaction_date,
-        ts.hk_store_id,
-        al.hk_product_id,
-        al.hk_transaction_id,
-        al.amount
+        ts.hk_store_id as hk_store_id,
+        al.hk_product_id as hk_product_id,
+        al.hk_transaction_id as hk_transaction_id,
+        al.amount as amount
     from all_lines as al
     inner join sat_txn   as t  on al.hk_transaction_id = t.hk_transaction_id
     inner join txn_store as ts on al.hk_transaction_id = ts.hk_transaction_id
@@ -84,11 +84,11 @@ lines as (
 with_bk as (
 
     select
-        l.transaction_date,
-        hp.product_id,
-        hs.store_id,
-        l.hk_transaction_id,
-        l.amount
+        l.transaction_date as transaction_date,
+        hp.product_id as product_id,
+        hs.store_id as store_id,
+        l.hk_transaction_id as hk_transaction_id,
+        l.amount as amount
     from lines as l
     inner join {{ source('core', 'HUB_PRODUCT') }} as hp
         on l.hk_product_id = hp.hk_product_id
@@ -98,29 +98,26 @@ with_bk as (
 ),
 
 with_keys as (
-
-    -- SK измерений (SCD2-версия на дату чека) + итог чека на каждой строке
     select
-        dc.date_key,
-        ds.store_key,
-        dp.product_key,
-        b.hk_transaction_id,
-        b.amount,
-        ct.check_total
+        dc.date_key as date_key,
+        ds.store_key as store_key,
+        dp.product_key as product_key,
+        b.hk_transaction_id as hk_transaction_id,
+        b.amount as amount,
+        ct.check_total as check_total
     from with_bk as b
     inner join check_totals as ct
         on b.hk_transaction_id = ct.hk_transaction_id
     inner join {{ ref('dim_calendar') }} as dc
         on b.transaction_date = dc.full_date
     inner join {{ ref('dim_store') }} as ds
-        on  b.store_id        = ds.store_id
-        and b.transaction_date >= ds.valid_from
-        and b.transaction_date <  ds.valid_to
+        on b.store_id = ds.store_id
     inner join {{ ref('dim_product') }} as dp
-        on  b.product_id      = dp.product_id
-        and b.transaction_date >= dp.valid_from
-        and b.transaction_date <  dp.valid_to
-
+        on b.product_id = dp.product_id
+    where b.transaction_date >= ds.valid_from
+      and b.transaction_date <  ds.valid_to
+      and b.transaction_date >= dp.valid_from
+      and b.transaction_date <  dp.valid_to
 ),
 
 txn_product as (

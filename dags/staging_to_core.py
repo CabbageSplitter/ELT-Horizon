@@ -5,6 +5,8 @@ from datetime import datetime
 
 from airflow import DAG
 from airflow.providers.docker.operators.docker import DockerOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+
 
 DBT_IMAGE = "horizon-dbt:latest"
 NETWORK = "horizon_net"
@@ -26,11 +28,11 @@ with DAG(
     schedule=None,
     catchup=False,
     tags=["dwh", "core", "dbt"],
-    description="Шаг 2: raw → staging через dbt",
+    description="staging -> core через dbt",
     default_args={"retries": 1},
 ) as dag:
 
-    dbt_run_staging = DockerOperator(
+    dbt_run_core = DockerOperator(
         task_id="dbt_run_core",
         image=DBT_IMAGE,
         command=dbt_command("run --select tag:core"),
@@ -43,7 +45,7 @@ with DAG(
         tty=True,
     )
 
-    dbt_test_staging = DockerOperator(
+    dbt_test_core = DockerOperator(
         task_id="dbt_test_core",
         image=DBT_IMAGE,
         command=dbt_command("test --select tag:core"),
@@ -55,5 +57,11 @@ with DAG(
         api_version="auto",
         tty=True,
     )
-
-    dbt_run_staging >> dbt_test_staging
+    trigger_marts = TriggerDagRunOperator(
+                task_id="trigger_core_to_marts",
+                trigger_dag_id="core_to_marts",   
+                reset_dag_run=True,                
+                wait_for_completion=False,         
+                poke_interval=30,
+            )
+    dbt_run_core >> dbt_test_core >> trigger_marts
