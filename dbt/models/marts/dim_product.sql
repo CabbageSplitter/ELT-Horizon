@@ -16,8 +16,10 @@ with sat as (
 
 versions as (
     select
-        hk_product_id, name, category, brand,
-        toDate(load_dts) as valid_from,
+        hk_product_id, name, category, brand, load_dts,
+        row_number() over (
+            partition by hk_product_id order by load_dts
+        ) as vn,
         leadInFrame(toNullable(toDate(load_dts)), 1) over (
             partition by hk_product_id order by load_dts
             rows between unbounded preceding and unbounded following
@@ -32,12 +34,12 @@ hub as (
 )
 
 select
-    row_number() over (order by h.product_id, v.valid_from) as product_key,
+    row_number() over (order by h.product_id, v.vn) as product_key,
     h.product_id,
     v.name as product_name,
     v.category,
     v.brand,
-    v.valid_from,
+    if(v.vn = 1, toDate('1900-01-01'), toDate(v.load_dts)) as valid_from,
     coalesce(v.next_from, toDate('2100-12-31')) as valid_to,
     v.next_from is null as is_current
 from versions v

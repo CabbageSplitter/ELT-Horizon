@@ -138,6 +138,50 @@ services:
       DBT_CH_USER: ${CLICKHOUSE_USER}
       DBT_CH_PASSWORD: ${CLICKHOUSE_PASSWORD}
 
+    
+  superset-init:
+    build: ./superset
+    container_name: superset-init
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+    volumes:
+      - ./superset_home:/app/superset_home
+      - ./superset/superset_config.py:/app/pythonpath/superset_config.py
+    command:
+      - /bin/bash
+      - -c
+      - |
+        superset db upgrade &&
+        superset fab create-admin \
+          --username admin \
+          --firstname Admin \
+          --lastname Admin \
+          --email admin@example.com \
+          --password admin &&
+        superset init
+    restart: "no"
+
+  superset:
+    build: ./superset
+    container_name: superset
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - "8088:8088"
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+    volumes:
+      - ./superset_home:/app/superset_home
+      - ./superset/superset_config.py:/app/pythonpath/superset_config.py
+    command: gunicorn --bind 0.0.0.0:8088 --workers 2 --timeout 120 "superset.app:create_app()"
+    restart: unless-stopped
+
 volumes:
   clickhouse_data:
   clickhouse_logs:

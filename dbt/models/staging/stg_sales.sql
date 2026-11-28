@@ -6,7 +6,7 @@ cleaned as (
         accurateCastOrNull(nullIf(amount, ''), 'Decimal(10,2)') as amount,
         accurateCastOrNull(nullIf(oquantity, ''), 'Decimal(10,3)') as oquantity,
         toString(store_id) as store_id,
-        toDateTimeOrNull(nullIf(datetime, '')) as datetime
+        parseDateTimeBestEffortOrNull(nullIf(datetime, '')) as datetime
     from source
     where nullIf(transaction_id, '') is not null
 )

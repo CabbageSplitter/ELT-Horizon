@@ -12,7 +12,7 @@ sat_card as (
         {{ hash_key(['card_number', 'status']) }} as hash_diff,
         toFixedString(card_number, 50) as card_number,
         issue_date,
-        toFixedString(status, 20)
+        toFixedString(status, 20) as status
 
 
     from source
