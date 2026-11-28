@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  # Первичные ключи хабов: not_null + unique
+  - name: HUB_CARD
+    columns:
+      - name: hk_card_id
+        tests: [not_null, unique]
+
+  - name: HUB_CLIENT
+    columns:
+      - name: hk_client_id
+        tests: [not_null, unique]
+
+  - name: HUB_EMPLOYEE
+    columns:
+      - name: hk_employee_id
+        tests: [not_null, unique]
+
+  - name: HUB_LOYALTY_TRANSACTION
+    columns:
+      - name: hk_loyalty_transaction_id
+        tests: [not_null, unique]
+
+  - name: HUB_PRODUCT
+    columns:
+      - name: hk_product_id
+        tests: [not_null, unique]
+
+  - name: HUB_STORE
+    columns:
+      - name: hk_store_id
+        tests: [not_null, unique]
+
+  # Статусы карт лояльности
+  - name: SAT_CARD
+    columns:
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['active', 'blocked', 'expired']
+
+  # Кастомный тест: сумма продажи > 0
+  - name: SAT_SALE
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "amount > 0"

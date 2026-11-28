@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: staging
+    database: horizon
+    tables:
+      - name: stg_cards
+      - name: stg_clients
+      - name: stg_hr
+      - name: stg_products
+      - name: stg_sales
+      - name: stg_stores
+      - name: stg_transactions
+
+
+

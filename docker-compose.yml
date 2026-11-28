@@ -1,71 +1,91 @@
 version: '3.8'
 
 services:
-  seaweedfs:
-    image: chrislusf/seaweedfs:latest # open source альтернатива minio
-    container_name: seaweedfs
+
+  clickhouse:
+    image:  clickhouse/clickhouse-server:24.8
+    container_name: clickhouse_server
     ports:
-      - "8333:8333" #  S3 API
-      - "8888:8888" #  Web-интерфейса
-    command: "server -s3 -dir /data -volume.max 100"
+      - "8123:8123" #HTTP
+      - "9000:9000"
+    environment:
+      - CLICKHOUSE_DB=${CLICKHOUSE_DB}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
     volumes:
-      - ./seaweedfs_data:/data
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse_server
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   postgres: # БД Airflow
     image: postgres:15
     container_name: airflow-postgres
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 
   airflow-init:
-    image: apache/airflow:2.10.3
+    image: apache/airflow:2.11.2
     container_name: airflow-init
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__FERNET_KEY: ""
-      _PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow providers-amazon"
+      _PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow-providers-clickhousedb==1.0.1 pandas openpyxl urllib3<2.0.0"
+      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}@clickhouse:8123/${CLICKHOUSE_DB}
+
     entrypoint: /bin/bash
     command:
       - -c
       - |
         airflow db migrate
         airflow users create \
-          --username admin \
-          --password admin \
+          --username ${AIRFLOW_USERNAME} \
+          --password ${AIRFLOW_PASSWORD} \
           --firstname Admin \
           --lastname Admin \
           --role Admin \
-          --email admin@example.com || true
-        airflow connections add 's3_default' \
-          --conn-type 'aws' \
-          --conn-login 'any' \
-          --conn-password 'any' \
-          --conn-description 'SeaweedFS S3 Gateway' \
-          --conn-extra '{"endpoint_url": "http://seaweedfs:8333", "region_name": "us-east-1", "host": "http://seaweedfs:8333"}'
-        airflow connections add 'fs_default' --conn-type 'file' --conn-description 'Local File System' || true
+          --email ${AIRFLOW_EMAIL} || true
+
     restart: "no"
 
   airflow-webserver:
-    image: apache/airflow:2.10.3
+    image: apache/airflow:2.11.2
     container_name: airflow-webserver
     depends_on:
-      - postgres
-      - seaweedfs
-      - airflow-init
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+      clickhouse:
+        condition: service_healthy
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW_CONN_S3_DEFAULT: >-
-        s3://any:any@?endpoint_url=http%3A%2F%2Fseaweedfs%3A8333&region_name=us-east-1
+      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}@clickhouse:8123/${CLICKHOUSE_DB}
+      _PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow-providers-clickhousedb==1.0.1 pandas openpyxl urllib3<2.0.0"
+      AIRFLOW_CONN_FS_DEFAULT: '{"conn_type": "fs", "extra": {"path": "/opt/airflow/data"}}'
     ports:
       - "8080:8080"
     volumes:
@@ -77,20 +97,95 @@ services:
 
 
   airflow-scheduler:
-    image: apache/airflow:2.10.3
+    image: apache/airflow:2.11.2
     container_name: airflow-scheduler
     depends_on:
-      - postgres
-      - seaweedfs
-      - airflow-init
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+      clickhouse:
+        condition: service_healthy
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW_CONN_S3_DEFAULT: >-
-        s3://any:any@?endpoint_url=http%3A%2F%2Fseaweedfs%3A8333&region_name=us-east-1
+      AIRFLOW_CONN_CLICKHOUSE_DEFAULT: clickhouse://${CLICKHOUSE_USER}:${CLICKHOUSE_PASSWORD}@clickhouse:8123/${CLICKHOUSE_DB}
+      AIRFLOW_CONN_FS_DEFAULT: '{"conn_type": "fs", "extra": {"path": "/opt/airflow/data"}}'
+      _PIP_ADDITIONAL_REQUIREMENTS: "apache-airflow-providers-clickhousedb==1.0.1 apache-airflow-providers-docker pandas openpyxl urllib3<2.0.0"
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./data:/opt/airflow/data
+      - /var/run/docker.sock:/var/run/docker.sock
     command: scheduler
     restart: unless-stopped
+
+  dbt:
+    image: horizon-dbt:latest
+    build:
+      context: ./dbt
+    container_name: dbt
+    profiles: ["tools"]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    volumes:
+      - ./dbt:/usr/app/dbt
+    working_dir: /usr/app/dbt
+    environment:
+      DBT_PROFILES_DIR: /usr/app/dbt
+      DBT_CH_HOST: clickhouse
+      DBT_CH_USER: ${CLICKHOUSE_USER}
+      DBT_CH_PASSWORD: ${CLICKHOUSE_PASSWORD}
+
+    
+  superset-init:
+    build: ./superset
+    container_name: superset-init
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+    volumes:
+      - ./superset_home:/app/superset_home
+      - ./superset/superset_config.py:/app/pythonpath/superset_config.py
+    command:
+      - /bin/bash
+      - -c
+      - |
+        superset db upgrade &&
+        superset fab create-admin \
+          --username admin \
+          --firstname Admin \
+          --lastname Admin \
+          --email admin@example.com \
+          --password admin &&
+        superset init
+    restart: "no"
+
+  superset:
+    build: ./superset
+    container_name: superset
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - "8088:8088"
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+    volumes:
+      - ./superset_home:/app/superset_home
+      - ./superset/superset_config.py:/app/pythonpath/superset_config.py
+    command: gunicorn --bind 0.0.0.0:8088 --workers 2 --timeout 120 "superset.app:create_app()"
+    restart: unless-stopped
+
+volumes:
+  clickhouse_data:
+  clickhouse_logs:
+
+networks:
+  default:
+    name: horizon_net

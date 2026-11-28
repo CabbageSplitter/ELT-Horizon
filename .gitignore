@@ -3,6 +3,8 @@ seaweedfs_data/
 logs/
 postgres_data/
 test.py
+clickhouse_data/
+clickhouse_logs/
 
 
 # Byte-compiled / optimized / DLL files

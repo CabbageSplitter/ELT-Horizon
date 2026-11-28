@@ -1,0 +1,13 @@
+horizon_elt:
+  target: dev
+  outputs:
+    dev:
+      type: clickhouse
+      host: "{{ env_var('DBT_CH_HOST') }}"
+      port: 8123
+      user: "{{ env_var('DBT_CH_USER') }}"
+      password: "{{ env_var('DBT_CH_PASSWORD') }}"
+      schema: horizon
+      secure: false
+      connect_timeout: 10
+      send_recieve_timeout: 300

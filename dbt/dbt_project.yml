@@ -1,0 +1,25 @@
+name: horizon
+version: "1.0.0"
+config-version: 2
+profile: horizon_elt
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  horizon:
+    raw:
+      +materialized: table
+    staging:
+      +materialized: table
+      +tags: ["staging"] 
+    core:
+      +materialized: incremental
+      +tags: ["core"] 
+    marts:
+      +materialized: table
+      +tags: ["marts"] 
