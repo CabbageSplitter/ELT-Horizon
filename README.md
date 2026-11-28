@@ -15,6 +15,12 @@
 1. cmd: `pyrhon -m http.server 8081 --directory dbt/target`
 2. browser: `http://localhost:8081`
 
+Как посмотреть dashboard:
+1. browser: `http://localhost:8088`
+
+Как посмотреть airflow:
+1. browser: `http://localhost:8080`
+
 Проектная документация (архитектура + модели данных) -> /docs
 
 Рассчет метрик в marts:
