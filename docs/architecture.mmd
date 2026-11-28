@@ -1,0 +1,38 @@
+---
+config:
+  theme: redux-color
+  look: classic
+  layout: dagre
+---
+flowchart LR
+
+    subgraph Sources
+        csv@{ shape: win-pane, label: ".csv-file"}
+        json[hr.json - like api response]
+        xlsx@{ shape: cyl, label: ".xlsx-files - like db request result" }
+    end
+
+    subgraph DWH - Clickhouse
+        stage@{ shape: cyl, label: "Stage" }
+        dds@{ shape: cyl, label: "DDS" }
+        dm@{ shape: cyl, label: "DM" }
+
+    end
+
+    bi[Superset]
+
+    
+
+csv e1@==> stage
+e1@{ animate: true }
+json e2@==> stage
+e2@{ animate: true }
+xlsx e3@==> stage
+e3@{ animate: true }
+stage e4@==> dds
+e4@{ animate: true }
+dds e5@==> dm
+e5@{ animate: true }
+dm e6@==> bi
+e6@{ animate: true }
+
